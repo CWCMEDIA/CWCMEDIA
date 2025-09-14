@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWESOME COIN - The Most Epic Memecoin Ever! 🚀</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="Awesome_Face.svg.png" alt="Awesome Face" class="logo-awesome-face">
+                <span class="logo-text">AWESOME COIN</span>
+            </div>
+            <div class="nav-links">
+                <a href="#about">About</a>
+                <a href="#generator">Generator</a>
+                <a href="#roadmap">Roadmap</a>
+                <a href="#community">Community</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="awesome-face-container">
+                <div class="awesome-face-large" id="mainAwesomeFace">
+                    <img src="Awesome_Face.svg.png" alt="Awesome Face" class="awesome-face-image">
+                </div>
+                <div class="floating-coins">
+                    <div class="coin">💰</div>
+                    <div class="coin">💎</div>
+                    <div class="coin">🚀</div>
+                    <div class="coin">⭐</div>
+                </div>
+            </div>
+            <h1 class="hero-title">
+                <span class="title-line">THE MOST</span>
+                <span class="title-line awesome-text">AWESOME</span>
+                <span class="title-line">MEMECOIN</span>
+            </h1>
+            <p class="hero-subtitle">Experience the legendary Awesome Face meme like never before! Join the most epic community in crypto! 🚀</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="scrollToGenerator()">Create Your Awesome Face</button>
+                <button class="btn btn-secondary" onclick="scrollToAbout()">Learn More</button>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-arrow">↓</div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">Why AWESOME COIN is... Well, AWESOME! 😎</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>100% Community Driven</h3>
+                    <p>Built by memers, for memers. No corporate BS, just pure awesome vibes!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Blazing fast transactions that'll make your head spin (in a good way)!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Rug-Proof</h3>
+                    <p>This WILL BE the next BIG THING</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Custom Generator</h3>
+                    <p>Create your own unique Awesome Face and share it with the world!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Awesome Face Generator -->
+    <section id="generator" class="generator">
+        <div class="container">
+            <h2 class="section-title">Create Your Epic Awesome Face! 🎨</h2>
+            <div class="generator-container">
+                <div class="generator-preview">
+                    <div class="face-preview" id="facePreview">
+                        <div class="face-base" id="faceBase">
+                            <img src="Awesome_Face.svg.png" alt="Awesome Face" class="generator-face-image" id="generatorFaceImage">
+                        </div>
+                    </div>
+                    <div class="face-actions">
+                        <button class="btn btn-small" onclick="randomizeFace()">🎲 Randomize</button>
+                        <button class="btn btn-small" onclick="downloadFace()">💾 Download</button>
+                        <button class="btn btn-small" onclick="shareFace()">📤 Share</button>
+                    </div>
+                </div>
+                <div class="generator-controls">
+                    <div class="control-group">
+                        <label>Face Style:</label>
+                        <div class="style-options">
+                            <button class="style-btn active" data-style="awesome">Awesome Face</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Background Color:</label>
+                        <div class="color-picker">
+                            <input type="color" id="bgColor" value="#FFD700" onchange="updateBackground()">
+                            <div class="color-presets">
+                                <div class="color-preset" style="background: #FFD700" data-color="#FFD700"></div>
+                                <div class="color-preset" style="background: #FF6B6B" data-color="#FF6B6B"></div>
+                                <div class="color-preset" style="background: #4ECDC4" data-color="#4ECDC4"></div>
+                                <div class="color-preset" style="background: #45B7D1" data-color="#45B7D1"></div>
+                                <div class="color-preset" style="background: #96CEB4" data-color="#96CEB4"></div>
+                                <div class="color-preset" style="background: #FECA57" data-color="#FECA57"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Add Accessories:</label>
+                        <div class="accessory-options">
+                            <button class="accessory-btn" data-accessory="👑">👑</button>
+                            <button class="accessory-btn" data-accessory="🎩">🎩</button>
+                            <button class="accessory-btn" data-accessory="🕶️">🕶️</button>
+                            <button class="accessory-btn" data-accessory="💎">💎</button>
+                            <button class="accessory-btn" data-accessory="🚀">🚀</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap Section -->
+    <section id="roadmap" class="roadmap">
+        <div class="container">
+            <h2 class="section-title">Our Epic Journey 🗺️</h2>
+            <div class="roadmap-timeline">
+                <div class="timeline-item completed">
+                    <div class="timeline-marker">✅</div>
+                    <div class="timeline-content">
+                        <h3>Phase 1: Genesis</h3>
+                        <p>Launch of AWESOME COIN and community building</p>
+                    </div>
+                </div>
+                <div class="timeline-item active">
+                    <div class="timeline-marker">🚀</div>
+                    <div class="timeline-content">
+                        <h3>Phase 2: Awesome Generator</h3>
+                        <p>Custom face generator</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">🎮</div>
+                    <div class="timeline-content">
+                        <h3>Phase 3: Gaming Integration</h3>
+                        <p>Awesome Face themed games and rewards</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">🌍</div>
+                    <div class="timeline-content">
+                        <h3>Phase 4: Global Domination</h3>
+                        <p>Worldwide adoption and mainstream recognition</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section id="community" class="community">
+        <div class="container">
+            <h2 class="section-title">Join the Awesome Community! 🌟</h2>
+            <div class="community-stats">
+                <div class="stat">
+                    <div class="stat-number" id="memberCount">10,000+</div>
+                    <div class="stat-label">Awesome Members</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="facesCreated">50,000+</div>
+                    <div class="stat-label">Faces Created</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="marketCap">$1M+</div>
+                    <div class="stat-label">Market Cap</div>
+                </div>
+            </div>
+            <div class="community-links">
+                <a href="#" class="community-link">
+                    <span class="link-icon">💬</span>
+                    <span>Discord</span>
+                </a>
+                <a href="#" class="community-link">
+                    <span class="link-icon">🐦</span>
+                    <span>Twitter</span>
+                </a>
+                <a href="#" class="community-link">
+                    <span class="link-icon">📱</span>
+                    <span>Telegram</span>
+                </a>
+                <a href="#" class="community-link">
+                    <span class="link-icon">📖</span>
+                    <span>Whitepaper</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Awesome_Face.svg.png" alt="Awesome Face" class="footer-awesome-face">
+                    <span>AWESOME COIN</span>
+                </div>
+                <p class="footer-text">Making the world more awesome, one meme at a time! 🚀</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
