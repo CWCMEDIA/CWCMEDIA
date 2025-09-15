@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome Coin Game - Flappy Awesome Face! 🚀</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Game-specific styles */
+        .game-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .game-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .game-canvas-container {
+            position: relative;
+            border: 4px solid #FFD700;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+        }
+
+        .game-controls {
+            margin-top: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .game-instructions {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            color: #333;
+            max-width: 600px;
+        }
+
+        .game-instructions h3 {
+            font-family: 'Fredoka One', cursive;
+            color: #FFD700;
+            margin-bottom: 1rem;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .game-over-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-over-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            color: #FF6B6B;
+            margin-bottom: 1rem;
+        }
+
+        .final-score {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .back-to-home {
+            margin-top: 2rem;
+        }
+
+        .back-to-home a {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .game-canvas-container {
+                max-width: 90vw;
+                max-height: 70vh;
+            }
+            
+            #gameCanvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🎮 Flappy Awesome Face 🎮</h1>
+            <p class="game-subtitle">Navigate your Awesome Face through the obstacles and collect coins! 🚀</p>
+        </div>
+
+        <div class="game-instructions">
+            <h3>How to Play:</h3>
+            <p><strong>🖱️ Click</strong> or <strong>⬆️ Press Space/Up Arrow</strong> to make your Awesome Face fly!</p>
+            <p><strong>💰 Collect coins</strong> to increase your score</p>
+            <p><strong>🚫 Avoid obstacles</strong> - don't hit the pipes or ground!</p>
+            <p><strong>🎯 Goal:</strong> Fly as far as possible and get the highest score!</p>
+        </div>
+
+        <div class="game-canvas-container">
+            <div class="score-display" id="scoreDisplay">Score: 0</div>
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            
+            <div class="game-over-overlay" id="gameOverOverlay">
+                <div class="game-over-content">
+                    <h2 class="game-over-title">Game Over! 😎</h2>
+                    <p class="final-score" id="finalScore">Final Score: 0</p>
+                    <button class="btn btn-primary" onclick="startGame()">Play Again 🚀</button>
+                    <div class="back-to-home">
+                        <a href="index.html">← Back to Awesome Coin</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button class="btn btn-primary" id="startButton" onclick="startGame()">Start Game 🚀</button>
+            <p style="margin-top: 1rem; opacity: 0.8;">Click anywhere or press SPACE/↑ to jump!</p>
+        </div>
+    </div>
+
+    <script>
+        // Flappy Bird Game
+        class FlappyAwesomeGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.scoreDisplay = document.getElementById('scoreDisplay');
+                this.gameOverOverlay = document.getElementById('gameOverOverlay');
+                this.finalScore = document.getElementById('finalScore');
+                
+                this.gameState = 'waiting'; // waiting, playing, gameOver
+                this.score = 0;
+                this.highScore = localStorage.getItem('awesomeFlappyHighScore') || 0;
+                
+                this.bird = {
+                    x: 100,
+                    y: this.canvas.height / 2,
+                    width: 40,
+                    height: 40,
+                    velocity: 0,
+                    gravity: 0.5,
+                    jumpPower: -8,
+                    rotation: 0
+                };
+                
+                this.pipes = [];
+                this.coins = [];
+                this.pipeWidth = 60;
+                this.pipeGap = 200;
+                this.pipeSpeed = 2;
+                this.lastPipeTime = 0;
+                this.pipeInterval = 1500;
+                
+                this.coinWidth = 20;
+                this.coinSpeed = 2;
+                
+                this.backgroundOffset = 0;
+                this.clouds = [];
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.generateClouds();
+                this.gameLoop();
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' || e.code === 'ArrowUp') {
+                        e.preventDefault();
+                        this.jump();
+                    }
+                });
+                
+                this.canvas.addEventListener('click', () => {
+                    this.jump();
+                });
+                
+                // Prevent context menu on right click
+                this.canvas.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+            }
+            
+            generateClouds() {
+                for (let i = 0; i < 5; i++) {
+                    this.clouds.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * (this.canvas.height / 3),
+                        size: Math.random() * 30 + 20,
+                        speed: Math.random() * 0.5 + 0.2
+                    });
+                }
+            }
+            
+            jump() {
+                if (this.gameState === 'waiting') {
+                    this.startGame();
+                } else if (this.gameState === 'playing') {
+                    this.bird.velocity = this.bird.jumpPower;
+                    this.bird.rotation = -0.3;
+                } else if (this.gameState === 'gameOver') {
+                    this.startGame();
+                }
+            }
+            
+            startGame() {
+                this.gameState = 'playing';
+                this.score = 0;
+                this.bird.y = this.canvas.height / 2;
+                this.bird.velocity = 0;
+                this.pipes = [];
+                this.coins = [];
+                this.lastPipeTime = 0;
+                document.getElementById('startButton').style.display = 'none';
+            }
+            
+            update() {
+                if (this.gameState !== 'playing') return;
+                
+                // Update bird physics
+                this.bird.velocity += this.bird.gravity;
+                this.bird.y += this.bird.velocity;
+                this.bird.rotation = Math.min(Math.max(this.bird.velocity * 0.1, -0.5), 0.5);
+                
+                // Update background
+                this.backgroundOffset += 1;
+                if (this.backgroundOffset > this.canvas.width) {
+                    this.backgroundOffset = 0;
+                }
+                
+                // Update clouds
+                this.clouds.forEach(cloud => {
+                    cloud.x -= cloud.speed;
+                    if (cloud.x < -cloud.size) {
+                        cloud.x = this.canvas.width + cloud.size;
+                        cloud.y = Math.random() * (this.canvas.height / 3);
+                    }
+                });
+                
+                // Generate pipes
+                if (Date.now() - this.lastPipeTime > this.pipeInterval) {
+                    this.generatePipe();
+                    this.lastPipeTime = Date.now();
+                }
+                
+                // Update pipes
+                this.pipes.forEach((pipe, index) => {
+                    pipe.x -= this.pipeSpeed;
+                    
+                    // Remove pipes that are off screen
+                    if (pipe.x + this.pipeWidth < 0) {
+                        this.pipes.splice(index, 1);
+                    }
+                });
+                
+                // Generate coins
+                if (Math.random() < 0.02) {
+                    this.generateCoin();
+                }
+                
+                // Update coins
+                this.coins.forEach((coin, index) => {
+                    coin.x -= this.coinSpeed;
+                    coin.rotation += 0.1;
+                    
+                    // Remove coins that are off screen
+                    if (coin.x + this.coinWidth < 0) {
+                        this.coins.splice(index, 1);
+                    }
+                });
+                
+                // Check collisions
+                this.checkCollisions();
+            }
+            
+            generatePipe() {
+                const minHeight = 50;
+                const maxHeight = this.canvas.height - this.pipeGap - 50;
+                const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+                
+                this.pipes.push({
+                    x: this.canvas.width,
+                    topHeight: topHeight,
+                    bottomY: topHeight + this.pipeGap
+                });
+            }
+            
+            generateCoin() {
+                this.coins.push({
+                    x: this.canvas.width,
+                    y: Math.random() * (this.canvas.height - 100) + 50,
+                    rotation: 0
+                });
+            }
+            
+            checkCollisions() {
+                // Ground and ceiling collision
+                if (this.bird.y + this.bird.height > this.canvas.height - 50 || this.bird.y < 0) {
+                    this.gameOver();
+                    return;
+                }
+                
+                // Pipe collision
+                this.pipes.forEach(pipe => {
+                    if (this.bird.x < pipe.x + this.pipeWidth &&
+                        this.bird.x + this.bird.width > pipe.x) {
+                        if (this.bird.y < pipe.topHeight ||
+                            this.bird.y + this.bird.height > pipe.bottomY) {
+                            this.gameOver();
+                            return;
+                        }
+                    }
+                });
+                
+                // Coin collection
+                this.coins.forEach((coin, index) => {
+                    const distance = Math.sqrt(
+                        Math.pow(this.bird.x + this.bird.width/2 - (coin.x + this.coinWidth/2), 2) +
+                        Math.pow(this.bird.y + this.bird.height/2 - (coin.y + this.coinWidth/2), 2)
+                    );
+                    
+                    if (distance < (this.bird.width/2 + this.coinWidth/2)) {
+                        this.coins.splice(index, 1);
+                        this.score += 10;
+                        this.updateScore();
+                    }
+                });
+            }
+            
+            updateScore() {
+                this.scoreDisplay.textContent = `Score: ${this.score}`;
+                
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem('awesomeFlappyHighScore', this.highScore);
+                }
+            }
+            
+            gameOver() {
+                this.gameState = 'gameOver';
+                this.finalScore.textContent = `Final Score: ${this.score}`;
+                this.gameOverOverlay.style.display = 'flex';
+                
+                // Update high score display if needed
+                if (this.score === this.highScore && this.score > 0) {
+                    this.finalScore.innerHTML += '<br><span style="color: #FFD700; font-weight: bold;">🎉 New High Score! 🎉</span>';
+                }
+            }
+            
+            draw() {
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw background
+                this.drawBackground();
+                
+                // Draw clouds
+                this.drawClouds();
+                
+                if (this.gameState === 'waiting') {
+                    this.drawWaitingScreen();
+                    return;
+                }
+                
+                // Draw pipes
+                this.drawPipes();
+                
+                // Draw coins
+                this.drawCoins();
+                
+                // Draw bird (Awesome Face)
+                this.drawBird();
+                
+                // Draw ground
+                this.drawGround();
+            }
+            
+            drawBackground() {
+                // Sky gradient
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, '#87CEEB');
+                gradient.addColorStop(1, '#98FB98');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+            
+            drawClouds() {
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                this.clouds.forEach(cloud => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+                    this.ctx.arc(cloud.x + cloud.size/2, cloud.y, cloud.size * 0.8, 0, Math.PI * 2);
+                    this.ctx.arc(cloud.x - cloud.size/2, cloud.y, cloud.size * 0.8, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+            }
+            
+            drawWaitingScreen() {
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.ctx.fillStyle = 'white';
+                this.ctx.font = '48px Fredoka One';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('🎮 Ready to Play? 🎮', this.canvas.width/2, this.canvas.height/2 - 50);
+                
+                this.ctx.font = '24px Comic Neue';
+                this.ctx.fillText('Click or press SPACE to start!', this.canvas.width/2, this.canvas.height/2 + 20);
+                
+                this.drawBird();
+            }
+            
+            drawPipes() {
+                this.ctx.fillStyle = '#228B22';
+                this.ctx.strokeStyle = '#006400';
+                this.ctx.lineWidth = 3;
+                
+                this.pipes.forEach(pipe => {
+                    // Top pipe
+                    this.ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+                    this.ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+                    
+                    // Bottom pipe
+                    this.ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth, this.canvas.height - pipe.bottomY - 50);
+                    this.ctx.strokeRect(pipe.x, pipe.bottomY, this.pipeWidth, this.canvas.height - pipe.bottomY - 50);
+                    
+                    // Pipe caps
+                    this.ctx.fillRect(pipe.x - 5, pipe.topHeight - 20, this.pipeWidth + 10, 20);
+                    this.ctx.fillRect(pipe.x - 5, pipe.bottomY, this.pipeWidth + 10, 20);
+                });
+            }
+            
+            drawCoins() {
+                this.coins.forEach(coin => {
+                    this.ctx.save();
+                    this.ctx.translate(coin.x + this.coinWidth/2, coin.y + this.coinWidth/2);
+                    this.ctx.rotate(coin.rotation);
+                    
+                    // Draw coin
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.strokeStyle = '#FFA500';
+                    this.ctx.lineWidth = 2;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, this.coinWidth/2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    // Coin symbol
+                    this.ctx.fillStyle = '#FFA500';
+                    this.ctx.font = '16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText('💰', 0, 0);
+                    
+                    this.ctx.restore();
+                });
+            }
+            
+            drawBird() {
+                this.ctx.save();
+                this.ctx.translate(this.bird.x + this.bird.width/2, this.bird.y + this.bird.height/2);
+                this.ctx.rotate(this.bird.rotation);
+                
+                // Draw Awesome Face
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.strokeStyle = '#FFA500';
+                this.ctx.lineWidth = 2;
+                
+                // Face circle
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, this.bird.width/2, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.stroke();
+                
+                // Eyes
+                this.ctx.fillStyle = 'white';
+                this.ctx.beginPath();
+                this.ctx.arc(-8, -8, 6, 0, Math.PI * 2);
+                this.ctx.arc(8, -8, 6, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Pupils
+                this.ctx.fillStyle = 'black';
+                this.ctx.beginPath();
+                this.ctx.arc(-8, -8, 3, 0, Math.PI * 2);
+                this.ctx.arc(8, -8, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Smile
+                this.ctx.strokeStyle = 'black';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 2, 12, 0, Math.PI);
+                this.ctx.stroke();
+                
+                this.ctx.restore();
+            }
+            
+            drawGround() {
+                this.ctx.fillStyle = '#8B4513';
+                this.ctx.fillRect(0, this.canvas.height - 50, this.canvas.width, 50);
+                
+                // Grass on top
+                this.ctx.fillStyle = '#228B22';
+                this.ctx.fillRect(0, this.canvas.height - 60, this.canvas.width, 10);
+            }
+            
+            gameLoop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Global functions
+        function startGame() {
+            if (window.game) {
+                window.game.startGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.game = new FlappyAwesomeGame();
+        });
+    </script>
+</body>
+</html>
