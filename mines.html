@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome Mines - Find Coins or Hit Mines! 💰💣</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Mines Game specific styles */
+        .game-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .game-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            font-family: 'Fredoka One', cursive;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            color: #333;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .game-instructions {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            color: #333;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .game-instructions h3 {
+            font-family: 'Fredoka One', cursive;
+            color: #FFD700;
+            margin-bottom: 1rem;
+        }
+
+        .mines-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 15px;
+        }
+
+        .mine-tile {
+            width: 60px;
+            height: 60px;
+            background: #34495E;
+            border: 2px solid #2C3E50;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mine-tile:hover {
+            background: #4A6741;
+            transform: scale(1.05);
+        }
+
+        .mine-tile.revealed {
+            background: #27AE60;
+            cursor: default;
+        }
+
+        .mine-tile.mine {
+            background: #E74C3C;
+            animation: explode 0.5s ease;
+        }
+
+        .mine-tile.coin {
+            background: #F39C12;
+            animation: coinReveal 0.5s ease;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); background: #FF0000; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes coinReveal {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Comic Neue', cursive;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #FFD700, #FF6B6B);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #FFD700;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #E74C3C, #C0392B);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+        }
+
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .game-over-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+        }
+
+        .game-over-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .game-over-title.win {
+            color: #27AE60;
+        }
+
+        .game-over-title.lose {
+            color: #E74C3C;
+        }
+
+        .final-stats {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .back-to-home {
+            margin-top: 2rem;
+        }
+
+        .back-to-home a {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .difficulty-btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid #FFD700;
+            background: transparent;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .difficulty-btn.active {
+            background: #FFD700;
+            color: #333;
+        }
+
+        .difficulty-btn:hover {
+            background: #FFD700;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .mines-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .mine-tile {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">💣 Awesome Mines 💰</h1>
+            <p class="game-subtitle">Find coins or hit mines! Cash out before it's too late! 🚀</p>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat">
+                <div class="stat-value" id="coinsFound">0</div>
+                <div class="stat-label">Coins Found</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="multiplier">1.0x</div>
+                <div class="stat-label">Multiplier</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="potentialWin">$0</div>
+                <div class="stat-label">Potential Win</div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" onclick="setDifficulty('easy')">Easy (3 mines)</button>
+            <button class="difficulty-btn" onclick="setDifficulty('medium')">Medium (5 mines)</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard (8 mines)</button>
+        </div>
+
+        <div class="game-instructions">
+            <h3>How to Play:</h3>
+            <p><strong>🎯 Click tiles</strong> to reveal coins or mines</p>
+            <p><strong>💰 Find coins</strong> to increase your multiplier</p>
+            <p><strong>💣 Avoid mines</strong> - they end the game!</p>
+            <p><strong>💵 Cash out</strong> anytime to secure your winnings</p>
+        </div>
+
+        <div class="mines-grid" id="minesGrid">
+            <!-- Grid will be generated by JavaScript -->
+        </div>
+
+        <div class="game-controls">
+            <button class="btn btn-secondary" id="newGameBtn" onclick="newGame()">New Game 🎮</button>
+            <button class="btn btn-primary" id="cashOutBtn" onclick="cashOut()" disabled>Cash Out 💰</button>
+        </div>
+    </div>
+
+    <div class="game-over-overlay" id="gameOverOverlay">
+        <div class="game-over-content">
+            <h2 class="game-over-title" id="gameOverTitle">Game Over!</h2>
+            <p class="final-stats" id="finalStats">You found 0 coins!</p>
+            <button class="btn btn-primary" onclick="newGame()">Play Again 🚀</button>
+            <div class="back-to-home">
+                <a href="games.html">← Back to Games Hub</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Awesome Mines Game
+        class AwesomeMinesGame {
+            constructor() {
+                this.gridSize = 25; // 5x5 grid
+                this.mines = [];
+                this.revealedTiles = [];
+                this.gameState = 'waiting'; // waiting, playing, gameOver
+                this.coinsFound = 0;
+                this.multiplier = 1.0;
+                this.baseBet = 10;
+                this.difficulty = 'easy';
+                this.mineCounts = { easy: 3, medium: 5, hard: 8 };
+                
+                this.gridElement = document.getElementById('minesGrid');
+                this.gameOverOverlay = document.getElementById('gameOverOverlay');
+                this.gameOverTitle = document.getElementById('gameOverTitle');
+                this.finalStats = document.getElementById('finalStats');
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.newGame();
+            }
+            
+            setupEventListeners() {
+                // Add any additional event listeners here
+            }
+            
+            setDifficulty(difficulty) {
+                this.difficulty = difficulty;
+                
+                // Update difficulty buttons
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[onclick="setDifficulty('${difficulty}')"]`).classList.add('active');
+                
+                this.newGame();
+            }
+            
+            newGame() {
+                this.gameState = 'playing';
+                this.coinsFound = 0;
+                this.multiplier = 1.0;
+                this.revealedTiles = [];
+                this.generateGrid();
+                this.updateStats();
+                this.gameOverOverlay.style.display = 'none';
+                
+                // Enable/disable buttons
+                document.getElementById('cashOutBtn').disabled = false;
+            }
+            
+            generateGrid() {
+                // Clear grid
+                this.gridElement.innerHTML = '';
+                
+                // Generate mines
+                this.mines = [];
+                const mineCount = this.mineCounts[this.difficulty];
+                const allPositions = Array.from({length: this.gridSize}, (_, i) => i);
+                
+                // Shuffle and pick mine positions
+                for (let i = allPositions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [allPositions[i], allPositions[j]] = [allPositions[j], allPositions[i]];
+                }
+                
+                this.mines = allPositions.slice(0, mineCount);
+                
+                // Create tiles
+                for (let i = 0; i < this.gridSize; i++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'mine-tile';
+                    tile.dataset.index = i;
+                    tile.addEventListener('click', () => this.revealTile(i));
+                    this.gridElement.appendChild(tile);
+                }
+            }
+            
+            revealTile(index) {
+                if (this.gameState !== 'playing' || this.revealedTiles.includes(index)) {
+                    return;
+                }
+                
+                const tile = document.querySelector(`[data-index="${index}"]`);
+                this.revealedTiles.push(index);
+                
+                if (this.mines.includes(index)) {
+                    // Hit a mine!
+                    tile.classList.add('mine');
+                    tile.textContent = '💣';
+                    this.gameOver(false);
+                } else {
+                    // Found a coin!
+                    tile.classList.add('coin');
+                    tile.textContent = '💰';
+                    this.coinsFound++;
+                    this.updateMultiplier();
+                    this.updateStats();
+                    
+                    // Check if all non-mine tiles are revealed
+                    const nonMineTiles = this.gridSize - this.mines.length;
+                    if (this.revealedTiles.length === nonMineTiles) {
+                        this.gameOver(true);
+                    }
+                }
+            }
+            
+            updateMultiplier() {
+                // Increase multiplier based on coins found
+                this.multiplier = 1.0 + (this.coinsFound * 0.5);
+                if (this.coinsFound >= 10) {
+                    this.multiplier = 1.0 + (this.coinsFound * 0.8);
+                }
+                if (this.coinsFound >= 20) {
+                    this.multiplier = 1.0 + (this.coinsFound * 1.2);
+                }
+            }
+            
+            updateStats() {
+                document.getElementById('coinsFound').textContent = this.coinsFound;
+                document.getElementById('multiplier').textContent = this.multiplier.toFixed(1) + 'x';
+                
+                const potentialWin = Math.floor(this.baseBet * this.multiplier);
+                document.getElementById('potentialWin').textContent = `$${potentialWin}`;
+            }
+            
+            cashOut() {
+                if (this.gameState !== 'playing' || this.coinsFound === 0) {
+                    return;
+                }
+                
+                this.gameState = 'gameOver';
+                const winnings = Math.floor(this.baseBet * this.multiplier);
+                
+                this.gameOverTitle.textContent = 'Cashed Out! 💰';
+                this.gameOverTitle.className = 'game-over-title win';
+                this.finalStats.innerHTML = `
+                    You cashed out with <strong>${this.coinsFound} coins</strong>!<br>
+                    Multiplier: <strong>${this.multiplier.toFixed(1)}x</strong><br>
+                    Winnings: <strong>$${winnings}</strong> 🎉
+                `;
+                
+                this.gameOverOverlay.style.display = 'flex';
+                document.getElementById('cashOutBtn').disabled = true;
+            }
+            
+            gameOver(won) {
+                this.gameState = 'gameOver';
+                
+                if (won) {
+                    this.gameOverTitle.textContent = 'Perfect Game! 🎉';
+                    this.gameOverTitle.className = 'game-over-title win';
+                    this.finalStats.innerHTML = `
+                        You found <strong>ALL ${this.coinsFound} coins</strong>!<br>
+                        Final Multiplier: <strong>${this.multiplier.toFixed(1)}x</strong><br>
+                        Total Winnings: <strong>$${Math.floor(this.baseBet * this.multiplier)}</strong> 🚀
+                    `;
+                } else {
+                    this.gameOverTitle.textContent = 'Mine Hit! 💣';
+                    this.gameOverTitle.className = 'game-over-title lose';
+                    this.finalStats.innerHTML = `
+                        You hit a mine! 💣<br>
+                        Coins Found: <strong>${this.coinsFound}</strong><br>
+                        <em>Better luck next time!</em>
+                    `;
+                }
+                
+                this.gameOverOverlay.style.display = 'flex';
+                document.getElementById('cashOutBtn').disabled = true;
+                
+                // Reveal all mines
+                this.mines.forEach(mineIndex => {
+                    const tile = document.querySelector(`[data-index="${mineIndex}"]`);
+                    if (!tile.classList.contains('mine')) {
+                        tile.classList.add('mine');
+                        tile.textContent = '💣';
+                        tile.style.opacity = '0.7';
+                    }
+                });
+            }
+        }
+        
+        // Global functions
+        function newGame() {
+            if (window.minesGame) {
+                window.minesGame.newGame();
+            }
+        }
+        
+        function cashOut() {
+            if (window.minesGame) {
+                window.minesGame.cashOut();
+            }
+        }
+        
+        function setDifficulty(difficulty) {
+            if (window.minesGame) {
+                window.minesGame.setDifficulty(difficulty);
+            }
+        }
+        
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.minesGame = new AwesomeMinesGame();
+        });
+    </script>
+</body>
+</html>
