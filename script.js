@@ -540,3 +540,79 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+// Copy contract address function
+function copyContract() {
+    const contractAddress = '3mDgKPVyguLqs2dudZ36bTRha4TDgfar6fGm8bm8xCoF';
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(contractAddress).then(() => {
+            showCopySuccess();
+        }).catch(() => {
+            fallbackCopy(contractAddress);
+        });
+    } else {
+        fallbackCopy(contractAddress);
+    }
+}
+
+function fallbackCopy(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showCopySuccess();
+    } catch (err) {
+        console.error('Failed to copy contract address');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function showCopySuccess() {
+    // Create success message
+    const successMsg = document.createElement('div');
+    successMsg.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: bold;
+        z-index: 10000;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+    `;
+    successMsg.textContent = '📋 Contract Address Copied!';
+    
+    // Add animation keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(successMsg);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        successMsg.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(successMsg);
+            document.head.removeChild(style);
+        }, 300);
+    }, 3000);
+}
