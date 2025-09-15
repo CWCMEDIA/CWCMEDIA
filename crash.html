@@ -68,10 +68,13 @@
             background: rgba(0, 0, 0, 0.8);
             border: 3px solid #FFD700;
             border-radius: 20px;
-            padding: 3rem;
-            margin: 2rem 0;
+            padding: 2rem;
+            margin: 1rem 0;
             text-align: center;
-            min-width: 400px;
+            min-width: 90%;
+            max-width: 600px;
+            width: 90%;
+            height: 300px;
             position: relative;
             overflow: hidden;
         }
@@ -386,17 +389,25 @@
             }
             
             .crash-display {
-                min-width: 300px;
-                padding: 2rem;
+                min-width: 95%;
+                width: 95%;
+                height: 250px;
+                padding: 1rem;
+                margin: 0.5rem 0;
             }
             
             .multiplier-display {
-                font-size: 3rem;
+                font-size: 2.5rem;
             }
             
             .bet-controls {
                 flex-direction: column;
                 align-items: center;
+            }
+            
+            .awesome-face-marker {
+                width: 30px;
+                height: 30px;
             }
         }
     </style>
@@ -525,29 +536,33 @@
                 const width = containerRect.width;
                 const height = containerRect.height;
                 
-                // Calculate position based on multiplier
+                // Calculate position based on multiplier (chart goes UP as multiplier increases)
                 const maxMultiplier = Math.max(this.currentMultiplier, this.crashPoint);
                 const normalizedMultiplier = Math.min(this.currentMultiplier / maxMultiplier, 1);
                 
-                // Position Awesome Face marker
-                const faceX = width * 0.9; // Near right edge
-                const faceY = height * (1 - normalizedMultiplier * 0.8) + 20; // Invert Y for chart
+                // Position Awesome Face marker (near right edge, moves up as multiplier increases)
+                const faceX = width * 0.85; // Near right edge
+                const faceY = height * (0.9 - normalizedMultiplier * 0.7); // Moves up as multiplier increases
                 this.awesomeFaceMarker.style.left = faceX + 'px';
                 this.awesomeFaceMarker.style.top = faceY + 'px';
                 
-                // Add point to chart
+                // Add point to chart (climbing pattern - goes up over time)
                 const time = Date.now() - this.chartStartTime;
+                const timeProgress = Math.min(time / 30000, 1); // Max 30 seconds of chart data
+                const chartX = timeProgress * (width - 100) + 50; // X position based on time
+                const chartY = height * (0.9 - normalizedMultiplier * 0.7); // Y position based on multiplier (inverted)
+                
                 this.chartPoints.push({
-                    x: time / 50, // Scale time to pixels
-                    y: normalizedMultiplier * 200 + 50 // Scale multiplier to pixels
+                    x: chartX,
+                    y: chartY
                 });
                 
-                // Keep only last 200 points for performance
-                if (this.chartPoints.length > 200) {
+                // Keep only last 100 points for performance
+                if (this.chartPoints.length > 100) {
                     this.chartPoints.shift();
                 }
                 
-                // Build SVG path
+                // Build SVG path (smooth climbing line)
                 let pathData = '';
                 if (this.chartPoints.length > 1) {
                     pathData = `M ${this.chartPoints[0].x} ${this.chartPoints[0].y}`;
