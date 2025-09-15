@@ -40,6 +40,30 @@
             opacity: 0.9;
         }
 
+        .currency-display {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .bet-amount {
+            background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
         .game-stats {
             display: flex;
             gap: 2rem;
@@ -385,6 +409,13 @@
         <div class="game-header">
             <h1 class="game-title">💣 Awesome Mines 💰</h1>
             <p class="game-subtitle">Find coins or hit mines! Cash out before it's too late! 🚀</p>
+            
+            <div class="currency-display">
+                💰 Balance: $<span id="balance">10</span>
+            </div>
+            <div class="bet-amount">
+                🎯 Current Bet: $<span id="currentBet">1</span>
+            </div>
         </div>
 
         <div class="game-stats">
@@ -406,6 +437,12 @@
             <button class="difficulty-btn active" onclick="setDifficulty('easy')">Easy (3 mines)</button>
             <button class="difficulty-btn" onclick="setDifficulty('medium')">Medium (5 mines)</button>
             <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard (8 mines)</button>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" onclick="setBet(1)">Bet $1</button>
+            <button class="difficulty-btn" onclick="setBet(5)">Bet $5</button>
+            <button class="difficulty-btn" onclick="setBet(10)">Bet $10</button>
         </div>
 
         <div class="game-instructions">
@@ -451,7 +488,8 @@
                 this.gameState = 'waiting'; // waiting, playing, gameOver
                 this.coinsFound = 0;
                 this.multiplier = 1.0;
-                this.baseBet = 10;
+                this.balance = 10; // Start with $10
+                this.currentBet = 1; // Start with $1 bet
                 this.difficulty = 'easy';
                 this.mineCounts = { easy: 3, medium: 5, hard: 8 };
                 
@@ -466,11 +504,17 @@
             
             init() {
                 this.setupEventListeners();
+                this.updateCurrencyDisplay();
                 this.newGame();
             }
             
             setupEventListeners() {
                 // Add any additional event listeners here
+            }
+            
+            updateCurrencyDisplay() {
+                document.getElementById('balance').textContent = this.balance;
+                document.getElementById('currentBet').textContent = this.currentBet;
             }
             
             createExplosionEffect(x, y) {
@@ -519,7 +563,7 @@
                 this.difficulty = difficulty;
                 
                 // Update difficulty buttons
-                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                document.querySelectorAll('.difficulty-selector:first-of-type .difficulty-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
                 document.querySelector(`[onclick="setDifficulty('${difficulty}')"]`).classList.add('active');
@@ -527,7 +571,30 @@
                 this.newGame();
             }
             
+            setBet(amount) {
+                this.currentBet = amount;
+                
+                // Update bet buttons
+                document.querySelectorAll('.difficulty-selector:last-of-type .difficulty-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[onclick="setBet(${amount})"]`).classList.add('active');
+                
+                this.updateCurrencyDisplay();
+                this.updateStats();
+            }
+            
             newGame() {
+                // Check if player has enough balance
+                if (this.balance < this.currentBet) {
+                    this.showGameOver('insufficient_funds');
+                    return;
+                }
+                
+                // Deduct bet from balance
+                this.balance -= this.currentBet;
+                this.updateCurrencyDisplay();
+                
                 this.gameState = 'playing';
                 this.coinsFound = 0;
                 this.multiplier = 1.0;
@@ -623,7 +690,7 @@
                 document.getElementById('coinsFound').textContent = this.coinsFound;
                 document.getElementById('multiplier').textContent = this.multiplier.toFixed(1) + 'x';
                 
-                const potentialWin = Math.floor(this.baseBet * this.multiplier);
+                const potentialWin = Math.floor(this.currentBet * this.multiplier);
                 document.getElementById('potentialWin').textContent = `$${potentialWin}`;
             }
             
@@ -633,14 +700,19 @@
                 }
                 
                 this.gameState = 'gameOver';
-                const winnings = Math.floor(this.baseBet * this.multiplier);
+                const winnings = Math.floor(this.currentBet * this.multiplier);
+                
+                // Add winnings to balance
+                this.balance += winnings;
+                this.updateCurrencyDisplay();
                 
                 this.gameOverTitle.textContent = 'Cashed Out! 💰';
                 this.gameOverTitle.className = 'game-over-title win';
                 this.finalStats.innerHTML = `
                     You cashed out with <strong>${this.coinsFound} coins</strong>!<br>
                     Multiplier: <strong>${this.multiplier.toFixed(1)}x</strong><br>
-                    Winnings: <strong>$${winnings}</strong> 🎉
+                    Winnings: <strong>$${winnings}</strong> 🎉<br>
+                    New Balance: <strong>$${this.balance}</strong>
                 `;
                 
                 this.gameOverOverlay.style.display = 'flex';
@@ -651,12 +723,17 @@
                 this.gameState = 'gameOver';
                 
                 if (won) {
+                    const winnings = Math.floor(this.currentBet * this.multiplier);
+                    this.balance += winnings;
+                    this.updateCurrencyDisplay();
+                    
                     this.gameOverTitle.textContent = 'Perfect Game! 🎉';
                     this.gameOverTitle.className = 'game-over-title win';
                     this.finalStats.innerHTML = `
                         You found <strong>ALL ${this.coinsFound} coins</strong>!<br>
                         Final Multiplier: <strong>${this.multiplier.toFixed(1)}x</strong><br>
-                        Total Winnings: <strong>$${Math.floor(this.baseBet * this.multiplier)}</strong> 🚀
+                        Total Winnings: <strong>$${winnings}</strong> 🚀<br>
+                        New Balance: <strong>$${this.balance}</strong>
                     `;
                 } else {
                     this.gameOverTitle.textContent = 'Mine Hit! 💣';
@@ -664,7 +741,8 @@
                     this.finalStats.innerHTML = `
                         You hit a mine! 💣<br>
                         Coins Found: <strong>${this.coinsFound}</strong><br>
-                        <em>Better luck next time!</em>
+                        <em>Better luck next time!</em><br>
+                        Balance: <strong>$${this.balance}</strong>
                     `;
                 }
                 
@@ -680,6 +758,23 @@
                         tile.style.opacity = '0.7';
                     }
                 });
+            }
+            
+            showGameOver(type) {
+                this.gameState = 'gameOver';
+                
+                if (type === 'insufficient_funds') {
+                    this.gameOverTitle.textContent = 'Insufficient Funds! 💸';
+                    this.gameOverTitle.className = 'game-over-title lose';
+                    this.finalStats.innerHTML = `
+                        You need at least <strong>$${this.currentBet}</strong> to play!<br>
+                        Current Balance: <strong>$${this.balance}</strong><br>
+                        <em>Come back when you have more coins!</em>
+                    `;
+                }
+                
+                this.gameOverOverlay.style.display = 'flex';
+                document.getElementById('cashOutBtn').disabled = true;
             }
         }
         
@@ -699,6 +794,12 @@
         function setDifficulty(difficulty) {
             if (window.minesGame) {
                 window.minesGame.setDifficulty(difficulty);
+            }
+        }
+        
+        function setBet(amount) {
+            if (window.minesGame) {
+                window.minesGame.setBet(amount);
             }
         }
         
