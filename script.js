@@ -289,13 +289,74 @@ class AwesomeFaceGenerator {
             window.requestAnimationFrame(step);
         };
 
+        // Special animation for market cap - goes to infinity
+        const animateMarketCap = (element) => {
+            let currentValue = 1000000; // Start at $1M
+            let increment = 100000; // Start with $100K increments
+            let speed = 50; // Update every 50ms
+            let duration = 0;
+            const maxDuration = 8000; // Run for 8 seconds
+            
+            const step = () => {
+                currentValue += increment;
+                
+                // Increase increment over time for exponential growth
+                if (currentValue > 10000000) increment = 500000;
+                if (currentValue > 100000000) increment = 2000000;
+                if (currentValue > 1000000000) increment = 10000000;
+                if (currentValue > 10000000000) increment = 50000000;
+                if (currentValue > 100000000000) increment = 200000000;
+                
+                // Format the number
+                if (currentValue >= 1000000000000) {
+                    element.textContent = `$${(currentValue / 1000000000000).toFixed(1)}T+`;
+                } else if (currentValue >= 1000000000) {
+                    element.textContent = `$${(currentValue / 1000000000).toFixed(1)}B+`;
+                } else if (currentValue >= 1000000) {
+                    element.textContent = `$${(currentValue / 1000000).toFixed(1)}M+`;
+                } else {
+                    element.textContent = `$${currentValue.toLocaleString()}+`;
+                }
+                
+                duration += speed;
+                
+                if (duration < maxDuration) {
+                    setTimeout(step, speed);
+                } else {
+                    // After animation, show infinity symbol
+                    setTimeout(() => {
+                        element.textContent = '$∞';
+                        element.style.background = 'linear-gradient(45deg, #FFD700, #FF6B6B, #4ECDC4, #45B7D1)';
+                        element.style.backgroundSize = '400% 400%';
+                        element.style.animation = 'rainbow 2s linear infinite';
+                        element.style.webkitBackgroundClip = 'text';
+                        element.style.webkitTextFillColor = 'transparent';
+                        element.style.fontSize = '3rem';
+                        element.style.transform = 'scale(1.2)';
+                        element.style.transition = 'all 0.5s ease';
+                    }, 500);
+                }
+            };
+            
+            step();
+        };
+
         // Animate counters when they come into view
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const element = entry.target;
-                    const finalValue = parseInt(element.textContent.replace(/[^\d]/g, ''));
-                    animateValue(element, 0, finalValue, 2000);
+                    const statLabel = element.parentElement.querySelector('.stat-label').textContent;
+                    
+                    if (statLabel.includes('Market Cap')) {
+                        // Special animation for market cap
+                        animateMarketCap(element);
+                    } else {
+                        // Regular animation for other stats
+                        const finalValue = parseInt(element.textContent.replace(/[^\d]/g, ''));
+                        animateValue(element, 0, finalValue, 2000);
+                    }
+                    
                     observer.unobserve(element);
                 }
             });
