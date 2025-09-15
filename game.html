@@ -183,6 +183,7 @@
                 <div class="game-over-content">
                     <h2 class="game-over-title">Game Over! 😎</h2>
                     <p class="final-score" id="finalScore">Final Score: 0</p>
+                    <div id="leaderboard" style="margin: 1rem 0;"></div>
                     <button class="btn btn-primary" onclick="startGame()">Play Again 🚀</button>
                     <div class="back-to-home">
                         <a href="index.html">← Back to Awesome Coin</a>
@@ -209,8 +210,11 @@
                 
                 this.gameState = 'waiting'; // waiting, playing, gameOver
                 this.score = 0;
-                this.highScore = localStorage.getItem('awesomeFlappyHighScore') || 0;
                 this.pipesPassed = 0; // Track pipes passed for scoring
+                
+                // Initialize leaderboard
+                this.leaderboard = this.loadLeaderboard();
+                this.maxLeaderboardEntries = 10;
                 
                 // Load Awesome Face image
                 this.awesomeFaceImage = new Image();
@@ -279,6 +283,37 @@
                 
                 this.awesomeFaceImage.src = imagePaths[index];
                 console.log(`Trying to load image: ${imagePaths[index]}`);
+            }
+            
+            loadLeaderboard() {
+                const saved = localStorage.getItem('awesomeFlappyLeaderboard');
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+                return [];
+            }
+            
+            saveLeaderboard() {
+                localStorage.setItem('awesomeFlappyLeaderboard', JSON.stringify(this.leaderboard));
+            }
+            
+            addToLeaderboard(score) {
+                const entry = {
+                    score: score,
+                    date: new Date().toLocaleDateString(),
+                    timestamp: Date.now()
+                };
+                
+                this.leaderboard.push(entry);
+                this.leaderboard.sort((a, b) => b.score - a.score);
+                
+                // Keep only top scores
+                if (this.leaderboard.length > this.maxLeaderboardEntries) {
+                    this.leaderboard = this.leaderboard.slice(0, this.maxLeaderboardEntries);
+                }
+                
+                this.saveLeaderboard();
+                return this.leaderboard.findIndex(savedEntry => savedEntry.timestamp === entry.timestamp);
             }
             
             setupEventListeners() {
@@ -470,15 +505,53 @@
             
             gameOver() {
                 this.gameState = 'gameOver';
-                this.finalScore.textContent = `Final Score: ${this.score}`;
-                this.gameOverOverlay.style.display = 'flex';
                 
-                // Update high score display if needed
-                if (this.score === this.highScore && this.score > 0) {
+                // Add score to leaderboard
+                const rank = this.addToLeaderboard(this.score);
+                const isNewHighScore = rank === 0 && this.score > 0;
+                
+                this.finalScore.textContent = `Final Score: ${this.score}`;
+                
+                // Show new high score message
+                if (isNewHighScore) {
                     this.finalScore.innerHTML += '<br><span style="color: #FFD700; font-weight: bold;">🎉 New High Score! 🎉</span>';
+                } else if (rank < 3 && this.score > 0) {
+                    const rankText = rank === 1 ? '2nd' : '3rd';
+                    this.finalScore.innerHTML += `<br><span style="color: #FFD700; font-weight: bold;">🏆 New ${rankText} Place! 🏆</span>`;
                 }
                 
-                console.log(`Game Over! Pipes Passed: ${this.pipesPassed}, Total Score: ${this.score}`);
+                // Update leaderboard display
+                this.updateLeaderboardDisplay();
+                this.gameOverOverlay.style.display = 'flex';
+                
+                console.log(`Game Over! Pipes Passed: ${this.pipesPassed}, Total Score: ${this.score}, Rank: ${rank + 1}`);
+            }
+            
+            updateLeaderboardDisplay() {
+                const leaderboardElement = document.getElementById('leaderboard');
+                if (!leaderboardElement) return;
+                
+                let html = '<h4 style="color: #FFD700; margin-bottom: 1rem;">🏆 Leaderboard 🏆</h4>';
+                
+                if (this.leaderboard.length === 0) {
+                    html += '<p style="color: #666; font-style: italic;">No scores yet. Be the first!</p>';
+                } else {
+                    html += '<div style="max-height: 200px; overflow-y: auto;">';
+                    this.leaderboard.forEach((entry, index) => {
+                        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
+                        const rank = index + 1;
+                        html += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: ${index < 3 ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'}; margin: 0.25rem 0; border-radius: 8px;">
+                                <span>${medal} #${rank}</span>
+                                <span style="font-weight: bold;">${entry.score}</span>
+                                <span style="font-size: 0.8rem; color: #666;">${entry.date}</span>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                leaderboardElement.innerHTML = html;
             }
             
             draw() {
@@ -674,6 +747,11 @@
             testImg.src = 'https://awesomecoin.fun/Awesome_Face.svg.png';
             
             window.game = new FlappyAwesomeGame();
+            
+            // Initialize leaderboard display
+            setTimeout(() => {
+                window.game.updateLeaderboardDisplay();
+            }, 100);
         });
     </script>
 </body>
