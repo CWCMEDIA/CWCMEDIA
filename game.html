@@ -213,7 +213,6 @@
                 
                 // Load Awesome Face image
                 this.awesomeFaceImage = new Image();
-                this.awesomeFaceImage.crossOrigin = 'anonymous';
                 this.awesomeFaceImage.onload = () => {
                     console.log('Awesome Face image loaded successfully!');
                     this.imageLoaded = true;
@@ -228,10 +227,10 @@
                 
                 // Try different image paths
                 const imagePaths = [
+                    'https://awesomecoin.fun/Awesome_Face.svg.png',
                     'Awesome_Face.svg.png',
                     './Awesome_Face.svg.png',
-                    window.location.origin + '/Awesome_Face.svg.png',
-                    'https://awesomecoin.fun/Awesome_Face.svg.png'
+                    window.location.origin + '/Awesome_Face.svg.png'
                 ];
                 
                 this.imageLoaded = false;
@@ -655,7 +654,7 @@
             const testImg = new Image();
             testImg.onload = () => console.log('Image test successful - Awesome Face is accessible');
             testImg.onerror = () => console.log('Image test failed - Awesome Face not accessible');
-            testImg.src = 'Awesome_Face.svg.png';
+            testImg.src = 'https://awesomecoin.fun/Awesome_Face.svg.png';
             
             window.game = new FlappyAwesomeGame();
         });
