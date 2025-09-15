@@ -135,6 +135,79 @@
             100% { transform: scale(1); }
         }
 
+        .explosion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        .explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #FF4500 0%, #FF6347 30%, #FFD700 60%, transparent 100%);
+            border-radius: 50%;
+            animation: explosionAnimation 1.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes explosionAnimation {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(3);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(8);
+                opacity: 0;
+            }
+        }
+
+        .screen-shake {
+            animation: screenShake 0.5s ease-in-out;
+        }
+
+        @keyframes screenShake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-10px); }
+            20% { transform: translateX(10px); }
+            30% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            50% { transform: translateX(-5px); }
+            60% { transform: translateX(5px); }
+            70% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+            90% { transform: translateX(-1px); }
+        }
+
+        .explosion-particles {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #FFD700;
+            border-radius: 50%;
+            animation: particleExplosion 1s ease-out forwards;
+        }
+
+        @keyframes particleExplosion {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) translate(var(--random-x), var(--random-y));
+                opacity: 0;
+            }
+        }
+
         @keyframes coinReveal {
             0% { transform: scale(1) rotate(0deg); }
             50% { transform: scale(1.2) rotate(180deg); }
@@ -353,6 +426,10 @@
         </div>
     </div>
 
+    <div class="explosion-overlay" id="explosionOverlay">
+        <!-- Explosion effects will be added here by JavaScript -->
+    </div>
+
     <div class="game-over-overlay" id="gameOverOverlay">
         <div class="game-over-content">
             <h2 class="game-over-title" id="gameOverTitle">Game Over!</h2>
@@ -382,6 +459,7 @@
                 this.gameOverOverlay = document.getElementById('gameOverOverlay');
                 this.gameOverTitle = document.getElementById('gameOverTitle');
                 this.finalStats = document.getElementById('finalStats');
+                this.explosionOverlay = document.getElementById('explosionOverlay');
                 
                 this.init();
             }
@@ -393,6 +471,48 @@
             
             setupEventListeners() {
                 // Add any additional event listeners here
+            }
+            
+            createExplosionEffect(x, y) {
+                // Show explosion overlay
+                this.explosionOverlay.style.display = 'block';
+                
+                // Create main explosion
+                const explosion = document.createElement('div');
+                explosion.className = 'explosion';
+                explosion.style.left = x + 'px';
+                explosion.style.top = y + 'px';
+                explosion.style.transform = 'translate(-50%, -50%)';
+                this.explosionOverlay.appendChild(explosion);
+                
+                // Create explosion particles
+                for (let i = 0; i < 15; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'explosion-particles';
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    
+                    // Random direction for particles
+                    const angle = (Math.PI * 2 * i) / 15;
+                    const distance = 50 + Math.random() * 100;
+                    const randomX = Math.cos(angle) * distance;
+                    const randomY = Math.sin(angle) * distance;
+                    
+                    particle.style.setProperty('--random-x', randomX + 'px');
+                    particle.style.setProperty('--random-y', randomY + 'px');
+                    
+                    this.explosionOverlay.appendChild(particle);
+                }
+                
+                // Add screen shake effect
+                document.body.classList.add('screen-shake');
+                
+                // Clean up after animation
+                setTimeout(() => {
+                    this.explosionOverlay.innerHTML = '';
+                    this.explosionOverlay.style.display = 'none';
+                    document.body.classList.remove('screen-shake');
+                }, 1500);
             }
             
             setDifficulty(difficulty) {
@@ -459,7 +579,19 @@
                     // Hit a mine!
                     tile.classList.add('mine');
                     tile.textContent = '💣';
-                    this.gameOver(false);
+                    
+                    // Get tile position for explosion effect
+                    const rect = tile.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    
+                    // Create explosion effect
+                    this.createExplosionEffect(x, y);
+                    
+                    // Delay game over to let explosion play
+                    setTimeout(() => {
+                        this.gameOver(false);
+                    }, 800);
                 } else {
                     // Found a coin!
                     tile.classList.add('coin');
