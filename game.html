@@ -373,6 +373,8 @@
                         this.pipesPassed++;
                         this.score += 1; // 1 point per pipe passed
                         this.updateScore();
+                        console.log(`Pipe passed! Bird X: ${this.bird.x}, Pipe X: ${pipe.x}, Pipe Width: ${this.pipeWidth}`);
+                        console.log(`Score: ${this.score}, Pipes: ${this.pipesPassed}`);
                     }
                     
                     // Remove pipes that are off screen
