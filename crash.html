@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome Crash - Casino Game 🚀💥</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Crash Game specific styles */
+        .game-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .game-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .currency-display {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .bet-amount {
+            background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .crash-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #FFD700;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            text-align: center;
+            min-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .multiplier-display {
+            font-family: 'Fredoka One', cursive;
+            font-size: 4rem;
+            color: #00FF00;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px #00FF00;
+            transition: all 0.1s ease;
+        }
+
+        .crash-display.crashing .multiplier-display {
+            color: #FF0000;
+            text-shadow: 0 0 20px #FF0000;
+            animation: crashShake 0.5s ease-in-out;
+        }
+
+        .crash-display.waiting .multiplier-display {
+            color: #FFD700;
+            text-shadow: 0 0 20px #FFD700;
+        }
+
+        @keyframes crashShake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-10px); }
+            20% { transform: translateX(10px); }
+            30% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            50% { transform: translateX(-5px); }
+            60% { transform: translateX(5px); }
+            70% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+            90% { transform: translateX(-1px); }
+        }
+
+        .game-status {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .game-status.waiting {
+            color: #FFD700;
+        }
+
+        .game-status.running {
+            color: #00FF00;
+        }
+
+        .game-status.crashed {
+            color: #FF0000;
+        }
+
+        .crash-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00FF00, #FFD700, #FF0000);
+            transform: translateX(-100%);
+            transition: transform 0.1s ease;
+        }
+
+        .bet-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .bet-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #FFD700;
+            border-radius: 25px;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            width: 120px;
+            color: #333;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Comic Neue', cursive;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00FF00, #32CD32);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 255, 0, 0.6);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #FF0000, #DC143C);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.6);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .recent-multipliers {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-top: 2rem;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .recent-title {
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .multiplier-list {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .multiplier-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .multiplier-item.crash {
+            background: linear-gradient(45deg, #FF0000, #DC143C);
+            color: white;
+        }
+
+        .multiplier-item.high {
+            background: linear-gradient(45deg, #00FF00, #32CD32);
+            color: white;
+        }
+
+        .multiplier-item.medium {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+        }
+
+        .multiplier-item.low {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .game-over-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+        }
+
+        .game-over-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .game-over-title.win {
+            color: #27AE60;
+        }
+
+        .game-over-title.lose {
+            color: #E74C3C;
+        }
+
+        .final-stats {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .back-to-home {
+            margin-top: 2rem;
+        }
+
+        .back-to-home a {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .auto-cashout {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .auto-cashout-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #FFD700;
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            width: 100px;
+            color: #333;
+            margin: 0 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .crash-display {
+                min-width: 300px;
+                padding: 2rem;
+            }
+            
+            .multiplier-display {
+                font-size: 3rem;
+            }
+            
+            .bet-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    
+    <div class="game-container">
+        <div class="game-header">
+            <img src="Awesome_Face.svg.png" alt="Awesome Face" style="width: 80px; height: 80px; margin-bottom: 1rem; border-radius: 50%; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);">
+            <h1 class="game-title">🚀 Awesome Crash 💥</h1>
+            <p class="game-subtitle">Watch the multiplier climb! Cash out before it crashes! 🎯</p>
+            
+            <div class="currency-display">
+                💰 Balance: $<span id="balance">10</span>
+            </div>
+            <div class="bet-amount">
+                🎯 Current Bet: $<span id="currentBet">1</span>
+            </div>
+        </div>
+
+        <div class="crash-display waiting" id="crashDisplay">
+            <div class="crash-line" id="crashLine"></div>
+            <div class="multiplier-display" id="multiplierDisplay">1.00x</div>
+            <div class="game-status waiting" id="gameStatus">Place your bet and watch it fly! 🚀</div>
+        </div>
+
+        <div class="auto-cashout">
+            <label for="autoCashout">Auto Cashout at: </label>
+            <input type="number" id="autoCashout" class="auto-cashout-input" min="1.01" max="1000" step="0.01" value="2.00">
+            <span>x</span>
+        </div>
+
+        <div class="bet-controls">
+            <input type="number" id="betAmount" class="bet-input" min="0.01" max="100" step="0.01" value="1.00">
+            <button class="btn btn-primary" id="betBtn" onclick="placeBet()">Place Bet 🎯</button>
+            <button class="btn btn-danger" id="cashOutBtn" onclick="cashOut()" disabled>Cash Out 💰</button>
+        </div>
+
+        <div class="recent-multipliers">
+            <div class="recent-title">Recent Crashes 📊</div>
+            <div class="multiplier-list" id="multiplierList">
+                <!-- Recent multipliers will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="game-over-overlay" id="gameOverOverlay">
+        <div class="game-over-content">
+            <h2 class="game-over-title" id="gameOverTitle">Game Over!</h2>
+            <p class="final-stats" id="finalStats">You cashed out at 0.00x!</p>
+            <button class="btn btn-primary" onclick="newRound()">New Round 🚀</button>
+            <div class="back-to-home">
+                <a href="games.html">← Back to Games Hub</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Awesome Crash Game
+        class AwesomeCrashGame {
+            constructor() {
+                this.balance = 10; // Start with $10
+                this.currentBet = 1.00;
+                this.autoCashout = 2.00;
+                this.gameState = 'waiting'; // waiting, running, crashed
+                this.currentMultiplier = 1.00;
+                this.crashPoint = 1.00;
+                this.betPlaced = false;
+                this.cashOutMultiplier = 0;
+                this.recentMultipliers = [];
+                
+                this.crashDisplay = document.getElementById('crashDisplay');
+                this.multiplierDisplay = document.getElementById('multiplierDisplay');
+                this.gameStatus = document.getElementById('gameStatus');
+                this.crashLine = document.getElementById('crashLine');
+                this.betBtn = document.getElementById('betBtn');
+                this.cashOutBtn = document.getElementById('cashOutBtn');
+                this.gameOverOverlay = document.getElementById('gameOverOverlay');
+                this.gameOverTitle = document.getElementById('gameOverTitle');
+                this.finalStats = document.getElementById('finalStats');
+                
+                this.init();
+            }
+            
+            init() {
+                this.updateCurrencyDisplay();
+                this.updateRecentMultipliers();
+                this.generateCrashPoint();
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('betAmount').addEventListener('input', (e) => {
+                    this.currentBet = parseFloat(e.target.value) || 0.01;
+                    this.updateCurrencyDisplay();
+                });
+                
+                document.getElementById('autoCashout').addEventListener('input', (e) => {
+                    this.autoCashout = parseFloat(e.target.value) || 1.01;
+                });
+            }
+            
+            updateCurrencyDisplay() {
+                document.getElementById('balance').textContent = this.balance.toFixed(2);
+                document.getElementById('currentBet').textContent = this.currentBet.toFixed(2);
+            }
+            
+            generateCrashPoint() {
+                // Realistic crash point generation
+                // Higher probability of lower multipliers, decreasing exponentially
+                const rand = Math.random();
+                
+                if (rand < 0.3) {
+                    // 30% chance: 1.01x - 1.50x
+                    this.crashPoint = 1.01 + Math.random() * 0.49;
+                } else if (rand < 0.6) {
+                    // 30% chance: 1.50x - 2.50x
+                    this.crashPoint = 1.50 + Math.random() * 1.00;
+                } else if (rand < 0.8) {
+                    // 20% chance: 2.50x - 5.00x
+                    this.crashPoint = 2.50 + Math.random() * 2.50;
+                } else if (rand < 0.95) {
+                    // 15% chance: 5.00x - 10.00x
+                    this.crashPoint = 5.00 + Math.random() * 5.00;
+                } else {
+                    // 5% chance: 10.00x - 100.00x
+                    this.crashPoint = 10.00 + Math.random() * 90.00;
+                }
+                
+                this.crashPoint = Math.round(this.crashPoint * 100) / 100;
+            }
+            
+            placeBet() {
+                if (this.gameState !== 'waiting' || this.balance < this.currentBet) {
+                    return;
+                }
+                
+                this.balance -= this.currentBet;
+                this.updateCurrencyDisplay();
+                this.betPlaced = true;
+                this.betBtn.disabled = true;
+                this.gameStatus.textContent = 'Bet placed! Waiting for round to start... 🎯';
+                this.gameStatus.className = 'game-status waiting';
+            }
+            
+            startRound() {
+                if (this.gameState !== 'waiting') {
+                    return;
+                }
+                
+                this.gameState = 'running';
+                this.currentMultiplier = 1.00;
+                this.cashOutMultiplier = 0;
+                
+                this.crashDisplay.className = 'crash-display running';
+                this.gameStatus.textContent = 'Round started! Watch it climb! 🚀';
+                this.gameStatus.className = 'game-status running';
+                this.cashOutBtn.disabled = false;
+                
+                this.animateMultiplier();
+            }
+            
+            animateMultiplier() {
+                if (this.gameState !== 'running') {
+                    return;
+                }
+                
+                // Increment multiplier
+                this.currentMultiplier += 0.01;
+                
+                // Update display
+                this.multiplierDisplay.textContent = this.currentMultiplier.toFixed(2) + 'x';
+                this.crashLine.style.transform = `translateX(${(this.currentMultiplier / this.crashPoint) * 100}%)`;
+                
+                // Check for crash
+                if (this.currentMultiplier >= this.crashPoint) {
+                    this.crash();
+                    return;
+                }
+                
+                // Check auto cashout
+                if (this.betPlaced && this.currentMultiplier >= this.autoCashout) {
+                    this.autoCashOut();
+                    return;
+                }
+                
+                // Continue animation
+                setTimeout(() => this.animateMultiplier(), 50);
+            }
+            
+            cashOut() {
+                if (this.gameState !== 'running' || !this.betPlaced) {
+                    return;
+                }
+                
+                this.cashOutMultiplier = this.currentMultiplier;
+                const winnings = this.currentBet * this.cashOutMultiplier;
+                this.balance += winnings;
+                this.updateCurrencyDisplay();
+                
+                this.gameOverTitle.textContent = 'Cashed Out! 💰';
+                this.gameOverTitle.className = 'game-over-title win';
+                this.finalStats.innerHTML = `
+                    You cashed out at <strong>${this.cashOutMultiplier.toFixed(2)}x</strong>!<br>
+                    Bet: <strong>$${this.currentBet.toFixed(2)}</strong><br>
+                    Winnings: <strong>$${winnings.toFixed(2)}</strong> 🎉<br>
+                    New Balance: <strong>$${this.balance.toFixed(2)}</strong>
+                `;
+                
+                this.gameOverOverlay.style.display = 'flex';
+                this.cashOutBtn.disabled = true;
+            }
+            
+            autoCashOut() {
+                this.cashOut();
+            }
+            
+            crash() {
+                this.gameState = 'crashed';
+                this.crashDisplay.className = 'crash-display crashing';
+                this.gameStatus.textContent = `Crashed at ${this.crashPoint.toFixed(2)}x! 💥`;
+                this.gameStatus.className = 'game-status crashed';
+                this.cashOutBtn.disabled = true;
+                
+                // Add to recent multipliers
+                this.recentMultipliers.unshift(this.crashPoint);
+                if (this.recentMultipliers.length > 20) {
+                    this.recentMultipliers.pop();
+                }
+                this.updateRecentMultipliers();
+                
+                // Show game over if bet was placed
+                if (this.betPlaced) {
+                    this.gameOverTitle.textContent = 'Crashed! 💥';
+                    this.gameOverTitle.className = 'game-over-title lose';
+                    this.finalStats.innerHTML = `
+                        The game crashed at <strong>${this.crashPoint.toFixed(2)}x</strong>!<br>
+                        Your bet of <strong>$${this.currentBet.toFixed(2)}</strong> was lost 💸<br>
+                        Balance: <strong>$${this.balance.toFixed(2)}</strong>
+                    `;
+                    
+                    this.gameOverOverlay.style.display = 'flex';
+                }
+                
+                // Reset for next round
+                setTimeout(() => {
+                    this.newRound();
+                }, 3000);
+            }
+            
+            newRound() {
+                this.gameState = 'waiting';
+                this.betPlaced = false;
+                this.currentMultiplier = 1.00;
+                this.crashPoint = 1.00;
+                
+                this.crashDisplay.className = 'crash-display waiting';
+                this.multiplierDisplay.textContent = '1.00x';
+                this.gameStatus.textContent = 'Place your bet and watch it fly! 🚀';
+                this.gameStatus.className = 'game-status waiting';
+                this.crashLine.style.transform = 'translateX(-100%)';
+                
+                this.betBtn.disabled = false;
+                this.cashOutBtn.disabled = true;
+                this.gameOverOverlay.style.display = 'none';
+                
+                this.generateCrashPoint();
+                
+                // Auto-start round after 5 seconds
+                setTimeout(() => {
+                    this.startRound();
+                }, 5000);
+            }
+            
+            updateRecentMultipliers() {
+                const list = document.getElementById('multiplierList');
+                list.innerHTML = '';
+                
+                this.recentMultipliers.forEach(mult => {
+                    const item = document.createElement('div');
+                    item.className = 'multiplier-item';
+                    item.textContent = mult.toFixed(2) + 'x';
+                    
+                    if (mult < 1.5) {
+                        item.className += ' low';
+                    } else if (mult < 3.0) {
+                        item.className += ' medium';
+                    } else if (mult < 10.0) {
+                        item.className += ' high';
+                    } else {
+                        item.className += ' crash';
+                    }
+                    
+                    list.appendChild(item);
+                });
+            }
+        }
+        
+        // Global functions
+        function placeBet() {
+            if (window.crashGame) {
+                window.crashGame.placeBet();
+            }
+        }
+        
+        function cashOut() {
+            if (window.crashGame) {
+                window.crashGame.cashOut();
+            }
+        }
+        
+        function newRound() {
+            if (window.crashGame) {
+                window.crashGame.newRound();
+            }
+        }
+        
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.crashGame = new AwesomeCrashGame();
+            
+            // Start first round after 3 seconds
+            setTimeout(() => {
+                window.crashGame.newRound();
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
