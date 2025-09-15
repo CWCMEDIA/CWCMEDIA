@@ -210,6 +210,7 @@
                 this.gameState = 'waiting'; // waiting, playing, gameOver
                 this.score = 0;
                 this.highScore = localStorage.getItem('awesomeFlappyHighScore') || 0;
+                this.pipesPassed = 0; // Track pipes passed for scoring
                 
                 // Load Awesome Face image
                 this.awesomeFaceImage = new Image();
@@ -323,12 +324,14 @@
             startGame() {
                 this.gameState = 'playing';
                 this.score = 0;
+                this.pipesPassed = 0;
                 this.bird.y = this.canvas.height / 2;
                 this.bird.velocity = 0;
                 this.pipes = [];
                 this.coins = [];
                 this.lastPipeTime = 0;
                 document.getElementById('startButton').style.display = 'none';
+                this.updateScore();
             }
             
             update() {
@@ -364,6 +367,14 @@
                 this.pipes.forEach((pipe, index) => {
                     pipe.x -= this.pipeSpeed;
                     
+                    // Check if bird passed the pipe (for scoring)
+                    if (!pipe.passed && pipe.x + this.pipeWidth < this.bird.x) {
+                        pipe.passed = true;
+                        this.pipesPassed++;
+                        this.score += 1; // 1 point per pipe passed
+                        this.updateScore();
+                    }
+                    
                     // Remove pipes that are off screen
                     if (pipe.x + this.pipeWidth < 0) {
                         this.pipes.splice(index, 1);
@@ -398,7 +409,8 @@
                 this.pipes.push({
                     x: this.canvas.width,
                     topHeight: topHeight,
-                    bottomY: topHeight + this.pipeGap
+                    bottomY: topHeight + this.pipeGap,
+                    passed: false // Track if this pipe has been passed
                 });
             }
             
@@ -462,6 +474,8 @@
                 if (this.score === this.highScore && this.score > 0) {
                     this.finalScore.innerHTML += '<br><span style="color: #FFD700; font-weight: bold;">🎉 New High Score! 🎉</span>';
                 }
+                
+                console.log(`Game Over! Pipes Passed: ${this.pipesPassed}, Total Score: ${this.score}`);
             }
             
             draw() {
