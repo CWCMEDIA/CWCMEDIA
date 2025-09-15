@@ -291,6 +291,7 @@ class AwesomeFaceGenerator {
 
         // Special animation for market cap - goes to infinity
         const animateMarketCap = (element) => {
+            console.log('Starting market cap animation on element:', element);
             let currentValue = 1000000; // Start at $1M
             let increment = 100000; // Start with $100K increments
             let speed = 50; // Update every 50ms
@@ -318,6 +319,7 @@ class AwesomeFaceGenerator {
                     element.textContent = `$${currentValue.toLocaleString()}+`;
                 }
                 
+                console.log('Market cap now:', element.textContent);
                 duration += speed;
                 
                 if (duration < maxDuration) {
