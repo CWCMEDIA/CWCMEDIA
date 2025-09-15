@@ -213,13 +213,29 @@
                 
                 // Load Awesome Face image
                 this.awesomeFaceImage = new Image();
+                this.awesomeFaceImage.crossOrigin = 'anonymous';
                 this.awesomeFaceImage.onload = () => {
                     console.log('Awesome Face image loaded successfully!');
+                    this.imageLoaded = true;
                 };
-                this.awesomeFaceImage.onerror = () => {
-                    console.log('Failed to load Awesome Face image, using fallback');
+                this.awesomeFaceImage.onerror = (error) => {
+                    console.log('Failed to load Awesome Face image, trying next path', error);
+                    this.imageLoaded = false;
+                    // Try next image path
+                    const currentIndex = imagePaths.indexOf(this.awesomeFaceImage.src);
+                    this.tryLoadImage(imagePaths, currentIndex + 1);
                 };
-                this.awesomeFaceImage.src = 'Awesome_Face.svg.png';
+                
+                // Try different image paths
+                const imagePaths = [
+                    'Awesome_Face.svg.png',
+                    './Awesome_Face.svg.png',
+                    window.location.origin + '/Awesome_Face.svg.png',
+                    'https://awesomecoin.fun/Awesome_Face.svg.png'
+                ];
+                
+                this.imageLoaded = false;
+                this.tryLoadImage(imagePaths, 0);
                 
                 this.bird = {
                     x: 100,
@@ -253,6 +269,16 @@
                 this.setupEventListeners();
                 this.generateClouds();
                 this.gameLoop();
+            }
+            
+            tryLoadImage(imagePaths, index) {
+                if (index >= imagePaths.length) {
+                    console.log('All image paths failed, using fallback');
+                    return;
+                }
+                
+                this.awesomeFaceImage.src = imagePaths[index];
+                console.log(`Trying to load image: ${imagePaths[index]}`);
             }
             
             setupEventListeners() {
@@ -555,7 +581,7 @@
                 this.ctx.rotate(this.bird.rotation);
                 
                 // Draw Awesome Face image
-                if (this.awesomeFaceImage) {
+                if (this.awesomeFaceImage && this.imageLoaded && this.awesomeFaceImage.complete) {
                     this.ctx.drawImage(
                         this.awesomeFaceImage, 
                         -this.bird.width/2, 
@@ -625,6 +651,12 @@
         
         // Initialize game when page loads
         document.addEventListener('DOMContentLoaded', () => {
+            // Test image accessibility
+            const testImg = new Image();
+            testImg.onload = () => console.log('Image test successful - Awesome Face is accessible');
+            testImg.onerror = () => console.log('Image test failed - Awesome Face not accessible');
+            testImg.src = 'Awesome_Face.svg.png';
+            
             window.game = new FlappyAwesomeGame();
         });
     </script>
