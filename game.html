@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Awesome Coin Game - Flappy Bird! 🐦</title>
+    <title>Awesome Coin Game - Flappy Awesome Face! 🐦</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
@@ -163,13 +163,13 @@
     
     <div class="game-container">
         <div class="game-header">
-            <h1 class="game-title">🐦 Flappy Bird 🚀</h1>
-            <p class="game-subtitle">Navigate your bird through the obstacles and collect coins! 🚀</p>
+            <h1 class="game-title">🐦 Flappy Awesome Face 🐦</h1>
+            <p class="game-subtitle">Navigate your Awesome Face through the obstacles and collect coins! 🚀</p>
         </div>
 
         <div class="game-instructions">
             <h3>How to Play:</h3>
-            <p><strong>🖱️ Click</strong> or <strong>⬆️ Press Space/Up Arrow</strong> to make your bird fly!</p>
+            <p><strong>🖱️ Click</strong> or <strong>⬆️ Press Space/Up Arrow</strong> to make your Awesome Face fly!</p>
             <p><strong>💰 Collect coins</strong> to increase your score</p>
             <p><strong>🚫 Avoid obstacles</strong> - don't hit the pipes or ground!</p>
             <p><strong>🎯 Goal:</strong> Fly as far as possible and get the highest score!</p>
@@ -216,6 +216,31 @@
                 this.leaderboard = this.loadLeaderboard();
                 this.maxLeaderboardEntries = 10;
                 
+                // Load Awesome Face image
+                this.awesomeFaceImage = new Image();
+                this.awesomeFaceImage.onload = () => {
+                    console.log('Awesome Face image loaded successfully!');
+                    this.imageLoaded = true;
+                };
+                this.awesomeFaceImage.onerror = (error) => {
+                    console.log('Failed to load Awesome Face image, trying next path', error);
+                    this.imageLoaded = false;
+                    // Try next image path
+                    const currentIndex = imagePaths.indexOf(this.awesomeFaceImage.src);
+                    this.tryLoadImage(imagePaths, currentIndex + 1);
+                };
+                
+                // Try different image paths
+                const imagePaths = [
+                    'https://awesomecoin.fun/Awesome_Face.svg.png',
+                    'Awesome_Face.svg.png',
+                    './Awesome_Face.svg.png',
+                    window.location.origin + '/Awesome_Face.svg.png'
+                ];
+                
+                this.imageLoaded = false;
+                this.tryLoadImage(imagePaths, 0);
+                
                 this.bird = {
                     x: 100,
                     y: this.canvas.height / 2,
@@ -250,6 +275,15 @@
                 this.gameLoop();
             }
             
+            tryLoadImage(imagePaths, index) {
+                if (index >= imagePaths.length) {
+                    console.log('All image paths failed, using fallback');
+                    return;
+                }
+                
+                this.awesomeFaceImage.src = imagePaths[index];
+                console.log(`Trying to load image: ${imagePaths[index]}`);
+            }
             
             loadLeaderboard() {
                 const saved = localStorage.getItem('awesomeFlappyLeaderboard');
@@ -635,11 +669,48 @@
                 this.ctx.translate(this.bird.x + this.bird.width/2, this.bird.y + this.bird.height/2);
                 this.ctx.rotate(this.bird.rotation);
                 
-                // Draw bird emoji
-                this.ctx.font = `${this.bird.width}px Arial`;
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
-                this.ctx.fillText('🐦', 0, 0);
+                // Draw Awesome Face image
+                if (this.awesomeFaceImage && this.imageLoaded && this.awesomeFaceImage.complete) {
+                    this.ctx.drawImage(
+                        this.awesomeFaceImage, 
+                        -this.bird.width/2, 
+                        -this.bird.height/2, 
+                        this.bird.width, 
+                        this.bird.height
+                    );
+                } else {
+                    // Fallback to drawn face if image not loaded
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.strokeStyle = '#FFA500';
+                    this.ctx.lineWidth = 2;
+                    
+                    // Face circle
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, this.bird.width/2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    // Eyes
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.beginPath();
+                    this.ctx.arc(-8, -8, 6, 0, Math.PI * 2);
+                    this.ctx.arc(8, -8, 6, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Pupils
+                    this.ctx.fillStyle = 'black';
+                    this.ctx.beginPath();
+                    this.ctx.arc(-8, -8, 3, 0, Math.PI * 2);
+                    this.ctx.arc(8, -8, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Smile
+                    this.ctx.strokeStyle = 'black';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 2, 12, 0, Math.PI);
+                    this.ctx.stroke();
+                }
                 
                 this.ctx.restore();
             }
