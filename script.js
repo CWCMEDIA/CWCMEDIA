@@ -348,7 +348,10 @@ class AwesomeFaceGenerator {
                     const element = entry.target;
                     const statLabel = element.parentElement.querySelector('.stat-label').textContent;
                     
+                    console.log('Animating stat:', statLabel, 'Element:', element.textContent);
+                    
                     if (statLabel.includes('Market Cap')) {
+                        console.log('Starting market cap animation');
                         // Special animation for market cap
                         animateMarketCap(element);
                     } else {
@@ -365,6 +368,15 @@ class AwesomeFaceGenerator {
         document.querySelectorAll('.stat-number').forEach(stat => {
             observer.observe(stat);
         });
+        
+        // Force test the market cap animation after 3 seconds
+        setTimeout(() => {
+            const marketCapElement = document.getElementById('marketCap');
+            if (marketCapElement) {
+                console.log('Forcing market cap animation test');
+                animateMarketCap(marketCapElement);
+            }
+        }, 3000);
     }
 
     setupScrollAnimations() {
