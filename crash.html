@@ -76,6 +76,50 @@
             overflow: hidden;
         }
 
+        .chart-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-line {
+            stroke: #00FF00;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 10px #00FF00);
+        }
+
+        .chart-line.crashed {
+            stroke: #FF0000;
+            filter: drop-shadow(0 0 10px #FF0000);
+        }
+
+        .awesome-face-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            transition: all 0.1s ease;
+            z-index: 10;
+        }
+
+        .awesome-face-marker img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
         .multiplier-display {
             font-family: 'Fredoka One', cursive;
             font-size: 4rem;
@@ -376,6 +420,14 @@
         </div>
 
         <div class="crash-display waiting" id="crashDisplay">
+            <div class="chart-container" id="chartContainer">
+                <svg class="chart-svg" id="chartSvg">
+                    <path class="chart-line" id="chartLine" d=""></path>
+                </svg>
+            </div>
+            <div class="awesome-face-marker" id="awesomeFaceMarker">
+                <img src="Awesome_Face.svg.png" alt="Awesome Face" />
+            </div>
             <div class="crash-line" id="crashLine"></div>
             <div class="multiplier-display" id="multiplierDisplay">1.00x</div>
             <div class="game-status waiting" id="gameStatus">Place your bet and watch it fly! 🚀</div>
@@ -425,11 +477,16 @@
                 this.betPlaced = false;
                 this.cashOutMultiplier = 0;
                 this.recentMultipliers = [];
+                this.chartPoints = [];
+                this.chartStartTime = 0;
                 
                 this.crashDisplay = document.getElementById('crashDisplay');
                 this.multiplierDisplay = document.getElementById('multiplierDisplay');
                 this.gameStatus = document.getElementById('gameStatus');
                 this.crashLine = document.getElementById('crashLine');
+                this.chartSvg = document.getElementById('chartSvg');
+                this.chartLine = document.getElementById('chartLine');
+                this.awesomeFaceMarker = document.getElementById('awesomeFaceMarker');
                 this.betBtn = document.getElementById('betBtn');
                 this.cashOutBtn = document.getElementById('cashOutBtn');
                 this.gameOverOverlay = document.getElementById('gameOverOverlay');
@@ -460,6 +517,46 @@
             updateCurrencyDisplay() {
                 document.getElementById('balance').textContent = this.balance.toFixed(2);
                 document.getElementById('currentBet').textContent = this.currentBet.toFixed(2);
+            }
+            
+            updateChart() {
+                const container = this.crashDisplay;
+                const containerRect = container.getBoundingClientRect();
+                const width = containerRect.width;
+                const height = containerRect.height;
+                
+                // Calculate position based on multiplier
+                const maxMultiplier = Math.max(this.currentMultiplier, this.crashPoint);
+                const normalizedMultiplier = Math.min(this.currentMultiplier / maxMultiplier, 1);
+                
+                // Position Awesome Face marker
+                const faceX = width * 0.9; // Near right edge
+                const faceY = height * (1 - normalizedMultiplier * 0.8) + 20; // Invert Y for chart
+                this.awesomeFaceMarker.style.left = faceX + 'px';
+                this.awesomeFaceMarker.style.top = faceY + 'px';
+                
+                // Add point to chart
+                const time = Date.now() - this.chartStartTime;
+                this.chartPoints.push({
+                    x: time / 50, // Scale time to pixels
+                    y: normalizedMultiplier * 200 + 50 // Scale multiplier to pixels
+                });
+                
+                // Keep only last 200 points for performance
+                if (this.chartPoints.length > 200) {
+                    this.chartPoints.shift();
+                }
+                
+                // Build SVG path
+                let pathData = '';
+                if (this.chartPoints.length > 1) {
+                    pathData = `M ${this.chartPoints[0].x} ${this.chartPoints[0].y}`;
+                    for (let i = 1; i < this.chartPoints.length; i++) {
+                        pathData += ` L ${this.chartPoints[i].x} ${this.chartPoints[i].y}`;
+                    }
+                }
+                
+                this.chartLine.setAttribute('d', pathData);
             }
             
             generateCrashPoint() {
@@ -508,11 +605,14 @@
                 this.gameState = 'running';
                 this.currentMultiplier = 1.00;
                 this.cashOutMultiplier = 0;
+                this.chartPoints = [];
+                this.chartStartTime = Date.now();
                 
                 this.crashDisplay.className = 'crash-display running';
                 this.gameStatus.textContent = 'Round started! Watch it climb! 🚀';
                 this.gameStatus.className = 'game-status running';
                 this.cashOutBtn.disabled = false;
+                this.awesomeFaceMarker.style.display = 'block';
                 
                 this.animateMultiplier();
             }
@@ -528,6 +628,9 @@
                 // Update display
                 this.multiplierDisplay.textContent = this.currentMultiplier.toFixed(2) + 'x';
                 this.crashLine.style.transform = `translateX(${(this.currentMultiplier / this.crashPoint) * 100}%)`;
+                
+                // Update chart
+                this.updateChart();
                 
                 // Check for crash
                 if (this.currentMultiplier >= this.crashPoint) {
@@ -579,6 +682,10 @@
                 this.gameStatus.className = 'game-status crashed';
                 this.cashOutBtn.disabled = true;
                 
+                // Update chart to show crash
+                this.chartLine.classList.add('crashed');
+                this.updateChart(); // Final chart update
+                
                 // Add to recent multipliers
                 this.recentMultipliers.unshift(this.crashPoint);
                 if (this.recentMultipliers.length > 20) {
@@ -610,12 +717,16 @@
                 this.betPlaced = false;
                 this.currentMultiplier = 1.00;
                 this.crashPoint = 1.00;
+                this.chartPoints = [];
                 
                 this.crashDisplay.className = 'crash-display waiting';
                 this.multiplierDisplay.textContent = '1.00x';
                 this.gameStatus.textContent = 'Place your bet and watch it fly! 🚀';
                 this.gameStatus.className = 'game-status waiting';
                 this.crashLine.style.transform = 'translateX(-100%)';
+                this.chartLine.classList.remove('crashed');
+                this.chartLine.setAttribute('d', '');
+                this.awesomeFaceMarker.style.display = 'none';
                 
                 this.betBtn.disabled = false;
                 this.cashOutBtn.disabled = true;
