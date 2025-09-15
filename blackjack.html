@@ -539,26 +539,50 @@
                 return cardDiv;
             }
 
-            updateDisplay() {
+            updateDisplay(animateNewCardsOnly = false) {
                 document.getElementById('balance').textContent = this.balance;
                 document.getElementById('betAmount').value = this.currentBet;
                 
                 // Update dealer cards
                 const dealerContainer = document.getElementById('dealerCards');
-                dealerContainer.innerHTML = '';
-                this.dealerCards.forEach((card, index) => {
-                    const isHidden = index === 1 && !this.gameEnded;
-                    const delay = index * 0.2; // Stagger dealer cards
-                    dealerContainer.appendChild(this.createCardElement(card, isHidden, delay));
-                });
+                if (!animateNewCardsOnly) {
+                    dealerContainer.innerHTML = '';
+                    this.dealerCards.forEach((card, index) => {
+                        const isHidden = index === 1 && !this.gameEnded;
+                        const delay = index * 0.2; // Stagger dealer cards
+                        dealerContainer.appendChild(this.createCardElement(card, isHidden, delay));
+                    });
+                } else {
+                    // Only update hidden card visibility for existing cards
+                    this.dealerCards.forEach((card, index) => {
+                        const isHidden = index === 1 && !this.gameEnded;
+                        const existingCard = dealerContainer.children[index];
+                        if (existingCard) {
+                            // Update the card content without re-animating
+                            if (!isHidden && existingCard.classList.contains('card-back')) {
+                                // Convert back to face card
+                                existingCard.className = `card ${card.isRed ? 'red' : 'black'}`;
+                                existingCard.innerHTML = `
+                                    <div class="card-value">${card.value}</div>
+                                    <div class="card-suit">${card.suit}</div>
+                                    <div class="card-center">${card.value}</div>
+                                    <div class="card-suit" style="transform: rotate(180deg);">${card.suit}</div>
+                                    <div class="card-value" style="transform: rotate(180deg);">${card.value}</div>
+                                `;
+                            }
+                        }
+                    });
+                }
                 
                 // Update player cards
                 const playerContainer = document.getElementById('playerCards');
-                playerContainer.innerHTML = '';
-                this.playerCards.forEach((card, index) => {
-                    const delay = (this.dealerCards.length * 0.2) + (index * 0.2) + 0.3; // Stagger after dealer
-                    playerContainer.appendChild(this.createCardElement(card, false, delay));
-                });
+                if (!animateNewCardsOnly) {
+                    playerContainer.innerHTML = '';
+                    this.playerCards.forEach((card, index) => {
+                        const delay = (this.dealerCards.length * 0.2) + (index * 0.2) + 0.3; // Stagger after dealer
+                        playerContainer.appendChild(this.createCardElement(card, false, delay));
+                    });
+                }
                 
                 // Update hand values
                 const dealerValue = this.gameEnded ? this.calculateHandValue(this.dealerCards) : 
@@ -652,22 +676,22 @@
                 this.playerCards.push(this.dealCard());
                 const playerValue = this.calculateHandValue(this.playerCards);
                 
-                // Add special hit animation to the last card
-                setTimeout(() => {
-                    const playerContainer = document.getElementById('playerCards');
-                    const lastCard = playerContainer.lastElementChild;
-                    if (lastCard) {
-                        lastCard.classList.add('hit');
-                    }
-                }, 100);
+                // Add the new card with animation
+                const playerContainer = document.getElementById('playerCards');
+                const newCard = this.playerCards[this.playerCards.length - 1];
+                const delay = (this.dealerCards.length * 0.2) + (this.playerCards.length * 0.2) + 0.3;
+                const newCardElement = this.createCardElement(newCard, false, delay);
+                newCardElement.classList.add('hit');
+                playerContainer.appendChild(newCardElement);
                 
-                this.updateDisplay();
+                // Update display without re-animating existing cards
+                this.updateDisplay(true);
                 
                 if (playerValue > 21) {
                     this.updateGameStatus('💥 Bust! You lose!', 'status-lose');
                     this.gameEnded = true;
                     this.gameStarted = false;
-                    this.updateDisplay();
+                    this.updateDisplay(true);
                 } else if (playerValue === 21) {
                     this.stand();
                 }
@@ -699,7 +723,8 @@
                     
                     const playerValue = this.calculateHandValue(this.playerCards);
                     
-                    this.updateDisplay();
+                    // Update display without re-animating existing cards
+                    this.updateDisplay(true);
                     
                     // Determine winner
                     if (dealerValue > 21) {
@@ -727,13 +752,22 @@
                 this.playerCards.push(this.dealCard());
                 const playerValue = this.calculateHandValue(this.playerCards);
                 
-                this.updateDisplay();
+                // Add the new card with animation
+                const playerContainer = document.getElementById('playerCards');
+                const newCard = this.playerCards[this.playerCards.length - 1];
+                const delay = (this.dealerCards.length * 0.2) + (this.playerCards.length * 0.2) + 0.3;
+                const newCardElement = this.createCardElement(newCard, false, delay);
+                newCardElement.classList.add('hit');
+                playerContainer.appendChild(newCardElement);
+                
+                // Update display without re-animating existing cards
+                this.updateDisplay(true);
                 
                 if (playerValue > 21) {
                     this.updateGameStatus('💥 Double down bust! You lose!', 'status-lose');
                     this.gameEnded = true;
                     this.gameStarted = false;
-                    this.updateDisplay();
+                    this.updateDisplay(true);
                 } else {
                     this.stand();
                 }
