@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome Coin Games Hub - Phase 3 Gaming Integration! 🎮</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Games Hub specific styles */
+        .games-container {
+            min-height: 100vh;
+            padding: 8rem 2rem 4rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            z-index: 10;
+        }
+
+        .games-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .games-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .games-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card.unlocked {
+            cursor: pointer;
+        }
+
+        .game-card.unlocked:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-card.locked {
+            filter: blur(3px);
+            opacity: 0.7;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .game-card.locked::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.3));
+            z-index: 10;
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .game-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .game-card.locked .game-title {
+            color: #666;
+        }
+
+        .game-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .game-card.locked .game-description {
+            color: #999;
+        }
+
+        .game-status {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-unlocked {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .status-locked {
+            background: linear-gradient(45deg, #FF6B6B, #FF5252);
+            color: white;
+        }
+
+        .game-button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Comic Neue', cursive;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .btn-play {
+            background: linear-gradient(45deg, #FFD700, #FF6B6B);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-play:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .btn-locked {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .coming-soon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 215, 0, 0.9);
+            color: #333;
+            padding: 1rem 2rem;
+            border-radius: 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            z-index: 20;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-to-home {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .back-to-home a {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-to-home a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background: #FFD700;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #FFD700, #FF6B6B);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .games-title {
+                font-size: 2.5rem;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .game-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    
+    <div class="games-container">
+        <div class="games-header">
+            <h1 class="games-title">🎮 Awesome Coin Games Hub 🎮</h1>
+            <p class="games-subtitle">Welcome to Phase 3: Gaming Integration! Experience the power of Awesome Coin through epic games!</p>
+        </div>
+
+        <div class="games-grid">
+            <!-- Flappy Awesome Face - UNLOCKED -->
+            <div class="game-card unlocked" onclick="window.location.href='game.html'">
+                <div class="game-icon">🚀</div>
+                <div class="game-status status-unlocked">✅ Available Now</div>
+                <h3 class="game-title">Flappy Awesome Face</h3>
+                <p class="game-description">
+                    Navigate your Awesome Face through obstacles and collect coins in this epic Flappy Bird style adventure! 
+                    Features leaderboard, scoring system, and your actual Awesome Face logo!
+                </p>
+                <button class="game-button btn-play">Play Now! 🎮</button>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Awesome Coin Collector - LOCKED -->
+            <div class="game-card locked">
+                <div class="game-icon">💰</div>
+                <div class="game-status status-locked">🔒 Coming Soon</div>
+                <h3 class="game-title">Awesome Coin Collector</h3>
+                <p class="game-description">
+                    Collect falling Awesome Coins in this addictive endless runner! 
+                    Avoid obstacles, collect power-ups, and compete for the highest score!
+                </p>
+                <button class="game-button btn-locked">Locked 🔒</button>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%;"></div>
+                </div>
+                <div class="coming-soon">Coming Soon!</div>
+            </div>
+
+            <!-- Awesome Face Puzzle - LOCKED -->
+            <div class="game-card locked">
+                <div class="game-icon">🧩</div>
+                <div class="game-status status-locked">🔒 Coming Soon</div>
+                <h3 class="game-title">Awesome Face Puzzle</h3>
+                <p class="game-description">
+                    Solve challenging puzzles featuring your favorite Awesome Face! 
+                    Match pieces, complete patterns, and unlock new levels!
+                </p>
+                <button class="game-button btn-locked">Locked 🔒</button>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 60%;"></div>
+                </div>
+                <div class="coming-soon">Coming Soon!</div>
+            </div>
+
+            <!-- Awesome Racing - LOCKED -->
+            <div class="game-card locked">
+                <div class="game-icon">🏎️</div>
+                <div class="game-status status-locked">🔒 Coming Soon</div>
+                <h3 class="game-title">Awesome Racing</h3>
+                <p class="game-description">
+                    Race your Awesome Face through exciting tracks! 
+                    Collect coins, avoid obstacles, and become the ultimate Awesome racer!
+                </p>
+                <button class="game-button btn-locked">Locked 🔒</button>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 45%;"></div>
+                </div>
+                <div class="coming-soon">Coming Soon!</div>
+            </div>
+
+            <!-- Awesome Tower Defense - LOCKED -->
+            <div class="game-card locked">
+                <div class="game-icon">🏰</div>
+                <div class="game-status status-locked">🔒 Coming Soon</div>
+                <h3 class="game-title">Awesome Tower Defense</h3>
+                <p class="game-description">
+                    Defend your Awesome Coin fortress from invading enemies! 
+                    Build towers, upgrade defenses, and protect your treasure!
+                </p>
+                <button class="game-button btn-locked">Locked 🔒</button>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 30%;"></div>
+                </div>
+                <div class="coming-soon">Coming Soon!</div>
+            </div>
+
+            <!-- Awesome Battle Arena - LOCKED -->
+            <div class="game-card locked">
+                <div class="game-icon">⚔️</div>
+                <div class="game-status status-locked">🔒 Coming Soon</div>
+                <h3 class="game-title">Awesome Battle Arena</h3>
+                <p class="game-description">
+                    Enter the ultimate Awesome Face battle arena! 
+                    Fight other players, collect power-ups, and become the champion!
+                </p>
+                <button class="game-button btn-locked">Locked 🔒</button>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 15%;"></div>
+                </div>
+                <div class="coming-soon">Coming Soon!</div>
+            </div>
+        </div>
+
+        <div class="back-to-home">
+            <a href="index.html">← Back to Awesome Coin Home</a>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add hover effects to unlocked games
+            const unlockedGames = document.querySelectorAll('.game-card.unlocked');
+            unlockedGames.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add click prevention for locked games
+            const lockedGames = document.querySelectorAll('.game-card.locked');
+            lockedGames.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Show a fun message
+                    const comingSoon = card.querySelector('.coming-soon');
+                    comingSoon.style.animation = 'bounce 0.5s ease';
+                    setTimeout(() => {
+                        comingSoon.style.animation = '';
+                    }, 500);
+                });
+            });
+
+            // Add floating animation to game icons
+            const gameIcons = document.querySelectorAll('.game-icon');
+            gameIcons.forEach((icon, index) => {
+                icon.style.animation = `float 3s ease-in-out infinite`;
+                icon.style.animationDelay = `${index * 0.5}s`;
+            });
+        });
+
+        // CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+            }
+            
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% { transform: translate(-50%, -50%) scale(1); }
+                40% { transform: translate(-50%, -50%) scale(1.1); }
+                60% { transform: translate(-50%, -50%) scale(0.9); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
