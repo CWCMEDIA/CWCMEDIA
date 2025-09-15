@@ -211,6 +211,16 @@
                 this.score = 0;
                 this.highScore = localStorage.getItem('awesomeFlappyHighScore') || 0;
                 
+                // Load Awesome Face image
+                this.awesomeFaceImage = new Image();
+                this.awesomeFaceImage.onload = () => {
+                    console.log('Awesome Face image loaded successfully!');
+                };
+                this.awesomeFaceImage.onerror = () => {
+                    console.log('Failed to load Awesome Face image, using fallback');
+                };
+                this.awesomeFaceImage.src = 'Awesome_Face.svg.png';
+                
                 this.bird = {
                     x: 100,
                     y: this.canvas.height / 2,
@@ -528,12 +538,12 @@
                     this.ctx.fill();
                     this.ctx.stroke();
                     
-                    // Coin symbol
+                    // Coin symbol - Awesome Coin logo
                     this.ctx.fillStyle = '#FFA500';
-                    this.ctx.font = '16px Arial';
+                    this.ctx.font = 'bold 14px Arial';
                     this.ctx.textAlign = 'center';
                     this.ctx.textBaseline = 'middle';
-                    this.ctx.fillText('💰', 0, 0);
+                    this.ctx.fillText('A', 0, 0);
                     
                     this.ctx.restore();
                 });
@@ -544,37 +554,48 @@
                 this.ctx.translate(this.bird.x + this.bird.width/2, this.bird.y + this.bird.height/2);
                 this.ctx.rotate(this.bird.rotation);
                 
-                // Draw Awesome Face
-                this.ctx.fillStyle = '#FFD700';
-                this.ctx.strokeStyle = '#FFA500';
-                this.ctx.lineWidth = 2;
-                
-                // Face circle
-                this.ctx.beginPath();
-                this.ctx.arc(0, 0, this.bird.width/2, 0, Math.PI * 2);
-                this.ctx.fill();
-                this.ctx.stroke();
-                
-                // Eyes
-                this.ctx.fillStyle = 'white';
-                this.ctx.beginPath();
-                this.ctx.arc(-8, -8, 6, 0, Math.PI * 2);
-                this.ctx.arc(8, -8, 6, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Pupils
-                this.ctx.fillStyle = 'black';
-                this.ctx.beginPath();
-                this.ctx.arc(-8, -8, 3, 0, Math.PI * 2);
-                this.ctx.arc(8, -8, 3, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Smile
-                this.ctx.strokeStyle = 'black';
-                this.ctx.lineWidth = 2;
-                this.ctx.beginPath();
-                this.ctx.arc(0, 2, 12, 0, Math.PI);
-                this.ctx.stroke();
+                // Draw Awesome Face image
+                if (this.awesomeFaceImage) {
+                    this.ctx.drawImage(
+                        this.awesomeFaceImage, 
+                        -this.bird.width/2, 
+                        -this.bird.height/2, 
+                        this.bird.width, 
+                        this.bird.height
+                    );
+                } else {
+                    // Fallback to drawn face if image not loaded
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.strokeStyle = '#FFA500';
+                    this.ctx.lineWidth = 2;
+                    
+                    // Face circle
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, this.bird.width/2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                    
+                    // Eyes
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.beginPath();
+                    this.ctx.arc(-8, -8, 6, 0, Math.PI * 2);
+                    this.ctx.arc(8, -8, 6, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Pupils
+                    this.ctx.fillStyle = 'black';
+                    this.ctx.beginPath();
+                    this.ctx.arc(-8, -8, 3, 0, Math.PI * 2);
+                    this.ctx.arc(8, -8, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Smile
+                    this.ctx.strokeStyle = 'black';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 2, 12, 0, Math.PI);
+                    this.ctx.stroke();
+                }
                 
                 this.ctx.restore();
             }
